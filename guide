@@ -1,0 +1,204 @@
+Note: Before going to installation Connect domains to droplet.
+
+Login to Putty using your login details provided in email, change default password and proceed with this after installing first wordpress website.
+
+Step1:
+sudo apt-get update
+
+Step2:
+sudo apt-get install apache2
+
+Step3:
+sudo mkdir -p /var/www/domain.com/public_html
+
+Step4:
+sudo chown -R $USER:$USER /var/www/domain.com/public_html
+
+Step5:
+sudo chmod -R 755 /var/www
+
+Step6:
+nano /var/www/domain.com/public_html/index.html
+
+(Paste this content and  CTRL+X then y and enter)
+<html>
+  <head>
+    <title>Welcome to Example.com!</title>
+  </head>
+  <body>
+    <h1>Success!  The example.com virtual host is working!</h1>
+  </body>
+</html>
+
+Step7:
+
+sudo cp /etc/apache2/sites-available/000-default.conf /etc/apache2/sites-available/domain.com.conf
+
+Step8:
+
+sudo nano /etc/apache2/sites-available/domain.com.conf
+
+(Edit this content and  CTRL+X then y and enter)
+
+<VirtualHost *:80>
+        ServerAdmin admin@domain.com
+
+        ServerName domain.com
+        ServerAlias www.domain.com
+
+        DocumentRoot /var/www/domain.com/public_html
+
+        <Directory /var/www/domain.com/public_html>
+            Options FollowSymLinks
+            AllowOverride All
+            Require all granted
+        </Directory>
+
+        ErrorLog ${APACHE_LOG_DIR}/error.log
+        CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+
+
+Step9:
+sudo a2ensite domain.com.conf
+
+Step10:
+sudo a2dissite 000-default.conf
+
+Step11:
+sudo systemctl restart apache2
+
+Step12: MAKE SERVER WRITEABLE
+cd /var/www
+
+sudo chown -R www-data /var/www/
+
+Step13: Upload wordpress zip via filezilla to var/www and UNZIP inside domain.com/public_html
+
+Step14: Install Apache
+
+sudo apt update && sudo apt install apache2
+
+Step 15: Configure Firewall
+
+sudo ufw allow OpenSSH
+
+sudo ufw allow in "Apache Full"
+
+sudo ufw enable
+
+sudo ufw status
+
+Step16: Test Apache
+
+sudo service apache2 status (press q to exit status check mode)
+
+Step 17: Install MySQL
+
+sudo apt update && sudo apt install mysql-server
+
+sudo service mysql status
+
+Step18: MySQL Security
+
+sudo mysql_secure_installation
+
+-> ENTER | Y | 2 | Y | Y | Y | Y
+
+sudo mysqladmin -p -u root version
+
+Step19: Install PHP
+
+sudo apt update && sudo apt install php libapache2-mod-php php-mysql
+
+php -version
+
+
+Step20: Installing phpMyAdmin
+
+sudo apt update && sudo apt install phpmyadmin
+
+sudo ln -s /etc/phpmyadmin/apache.conf /etc/apache2/conf-available/phpmyadmin.conf
+
+sudo a2enconf phpmyadmin.conf
+
+sudo service apache2 reload
+
+
+Step20: Create MySQL User
+
+sudo mysql
+
+CREATE USER 'newuser'@'localhost' IDENTIFIED BY 'password';
+
+GRANT ALL PRIVILEGES ON * . * TO 'newuser'@'localhost';
+
+FLUSH PRIVILEGES;
+
+exit
+
+
+Step21: Secure PhpMyAdmin
+
+sudo nano /etc/apache2/conf-available/phpmyadmin.conf
+
+Alias /your_url /usr/share/phpmyadmin
+
+sudo service apache2 reload
+
+
+Step22: Install ZIP/Unzip (optional)
+
+apt-get update
+
+apt-get install zip unzip
+
+
+Step23: Enable .htaacess (optional)
+
+sudo apt-get update
+
+sudo a2enmod rewrite
+
+sudo nano /etc/apache2/sites-enabled/000-default.conf
+
+<Directory "/var/www/html">
+  AllowOverride All
+</Directory>
+
+Step24: Configure Apache File
+
+sudo nano /etc/apache2/apache2.conf
+
+<Directory /var/www/>
+    Options Indexes FollowSymLinks
+    AllowOverride All
+    Require all granted
+ </Directory>
+
+ <Directory /var/www/html>
+    Options -Indexes
+ </Directory>
+
+(Paste this below code to last of apache file)
+
+ ServerSignature Off
+   ServerTokens Prod
+
+Step25: install SSL Certificate
+
+sudo apt-get update
+
+ sudo add-apt-repository ppa:certbot/certbot
+
+sudo apt-get update
+
+sudo apt-get install python-certbot-apache
+
+ sudo apachectl stop
+
+letsencrypt --authenticator standalone --installer apache -d example.com
+
+sudo service apache2 start
+
+service apache2 restart
